@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import * as core from '@actions/core';
 import {IncomingWebhook} from "@slack/webhook";
 import slackMessage from "./app/slack-message.js";
-import createClickupTicket from './app/clickup-task.js';
+import createClickupTask, { ClickupTaskData } from './app/clickup-task.js';
 import ResultsParser from './app/results-parser.js';
 
 
@@ -25,6 +25,14 @@ const uploadReport = (core.getInput("clickup-upload-report") || process.env.CLIC
   await webhook.send(message);
 
   if (shouldCreateClickupTask && testStepOutcome === 'failure') {
-    await createClickupTicket(result, clickupToken, listId, filePath, uploadReport);
+    const data: ClickupTaskData = {
+      result,
+      token: clickupToken,
+      listId,
+      filePath,
+      uploadReport
+    };
+
+    await createClickupTask(data);
   }
 })();
