@@ -19,6 +19,8 @@ export default class ResultsParser {
   skippedTests: number;
   executionTime: string;
   failedTestsList: string[];
+  unsuccessFullRun: boolean = false
+
   constructor(filePath: string) {
     this.filePath = filePath;
     this.passedTests = 0;
@@ -59,7 +61,7 @@ export default class ResultsParser {
     return testResults;
   }
 
-  private getTestStatus(testJson){
+  private getTestStatus(testJson) {
     if(testJson["failure"] !== undefined){
       return "failed";
     }
@@ -69,5 +71,9 @@ export default class ResultsParser {
     else{
       return "passed";
     }
+  }
+
+  setResultParseToUnsuccessful() {
+    this.unsuccessFullRun = true;
   }
 }

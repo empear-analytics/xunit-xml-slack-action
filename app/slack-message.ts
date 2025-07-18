@@ -4,16 +4,16 @@ import withResultSlackMessage from "./slack-message-with-results";
 import noResultsSlackMessage from "./slack-message-no-results";
 
 
-export default async function slackMessage(testStepOutcome: string, filePath: string) {
+export default async function slackMessage(testStepOutcome: string, result: ResultsParser) {
   const actionInfo: ActionInfo = new ActionInfo();
   switch (testStepOutcome) {
     case "success":
     case "failure":
-      const result = new ResultsParser(filePath);
       try {
         await result.parse();
         return withResultSlackMessage(actionInfo, result);
       } catch (e) {
+        result.setResultParseToUnsuccessful();
         return noResultsSlackMessage(actionInfo,
           'NO TEST RESULT',
           'No test result was found, check the Action for more info.');
@@ -26,6 +26,7 @@ export default async function slackMessage(testStepOutcome: string, filePath: st
         `The test was ${testStepOutcome}, check the Action for more info.`);
 
     default:
+      result.setResultParseToUnsuccessful();
       return noResultsSlackMessage(actionInfo,
         'UNKNOWN RESULT',
         'Check the Action for more info.');
