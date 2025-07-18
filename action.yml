@@ -13,6 +13,18 @@ inputs:
   directory-path:
     description: 'Directory path to JUnit XML file'
     required: true
+  clickup-create-task:
+    description: 'If action should create a clickup task'
+    required: false
+  clickup-token:
+    description: 'Clickup API token'
+    required: false
+  clickup-list-id:
+    description: 'Clickup board id'
+    required: false
+  clickup-upload-report:
+    description: 'If action should upload report to clickup task'
+    required: false
 runs:
   using: 'node20'
   main: 'dist/index.js'
