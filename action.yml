@@ -25,6 +25,9 @@ inputs:
   clickup-upload-report:
     description: 'If action should upload report to clickup task'
     required: false
+  report-path:
+    description: 'Test report directory path'
+    required: false
 runs:
   using: 'node20'
   main: 'dist/index.js'
