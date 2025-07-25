@@ -1,7 +1,8 @@
 import ActionInfo from "./action-info";
 import ResultsParser from "./results-parser";
-import * as fs from 'fs';
-import * as zlib from 'zlib';
+import fs from 'fs';
+import tar from "tar";
+import path from "path";
 
 function createHeaders(token: string): Headers {
     const headers = new Headers();
@@ -11,11 +12,11 @@ function createHeaders(token: string): Headers {
     return headers;
 }
 
-function createTaskData(result: ResultsParser, actionInfo: ActionInfo, date: string, failedTestsList: string[]): any {
+function createTaskData(actionInfo: ActionInfo, date: string, failedTestsList: string[]): any {
     return {
         "name": "Execution failed on " + date,
         "status": "BLOCKING",
-        "description": result.unsuccessFullRun ? 'Tests did not run\n' + actionInfo.runUrl : actionInfo.runUrl + '\n' + failedTestsList
+        "description": actionInfo.runUrl + '\n\n' + failedTestsList.join(',\n')
     };
 }
 
@@ -34,49 +35,61 @@ async function createTask(url: string, headers: Headers, data: any): Promise<Res
 
 /**
  * Uploads gzipped report to Clickup task as attachment
- * @param filePath path to file
+ * @param reportPath path to file
  * @param headers headers including authorization token
  * @param taskId id of Clickup task 
  */
-async function uploadTaskAttachment(filePath: string, headers: Headers, taskId: string) {
-    const readStream = fs.createReadStream(filePath);
-    const writeStream = fs.createWriteStream(filePath + '.gz');
-    const gzip = zlib.createGzip();
+async function uploadTaskAttachment(reportPath: string, headers: Headers, taskId: string) {
+    const sourceDir = reportPath;
+    const outputFile = reportPath + '.tar.gz';
 
-    readStream.pipe(gzip).pipe(writeStream);
+    try {
+        await tar.c(
+            {
+                gzip: true,
+                file: outputFile,
+                cwd: path.dirname(sourceDir)
+            },
+            [path.basename(sourceDir)]
+        );
 
-    writeStream.on('finish', async () => {
         console.log('Report compressed successfully');
 
-        const file = fs.readFileSync(filePath + '.gz');
+        const file = fs.readFileSync(outputFile);
+
+        const fileName = outputFile.split('/')[outputFile.split('/').length - 1];
 
         const blob = new Blob([file], { type: 'application/zip' });
 
         let formdata = new FormData();
-        formdata.append("attachment", blob);
+        formdata.append("attachment", blob, fileName);
 
-        const requestOptionsAttachment = createRequestInit('POST', headers, formdata)
+        const attachmentHeaders = headers;
+        attachmentHeaders.delete('Content-Type');
+
+        const requestOptionsAttachment = createRequestInit('POST', attachmentHeaders, formdata)
 
         console.log('Attempting report upload');
 
         const resAttachment = await fetch(`https://api.clickup.com/api/v2/task/${taskId}/attachment`, requestOptionsAttachment);
+
         if (resAttachment.status === 200) {
             console.log('Report upload successful');
         } else {
             console.error('Report upload failed');
+            const resBody = await resAttachment.json();
+            console.log(resBody);
         }
-    });
-
-    writeStream.on('error', (err) => {
+    } catch (err) {
         console.error('Error compressing report:', err);
-    });
+    }
 }
 
 export interface ClickupTaskData {
     result: ResultsParser,
     token: string,
     listId: string,
-    filePath: string,
+    reportPath?: string,
     uploadReport?: boolean
 }
 
@@ -101,18 +114,22 @@ export default async function createClickupTask(data: ClickupTaskData) {
         const failedTestsList = data.result.failedTestsList;
         const failed = failedTests > 0;
 
-        if (data.result.unsuccessFullRun || failed) {
+        if (failed) {
             const date = new Date().toLocaleDateString('se');
-            const url = `https://api.clickup.com/api/v2/list/${listId}/task`;
+            const url = `https://api.clickup.com/api/v2/list/${listIdToUse}/task`;
             const headers = createHeaders(tokenToUse);
-            const reqData = createTaskData(data.result, actionInfo, date, failedTestsList);
+            const reqData = createTaskData(actionInfo, date, failedTestsList);
 
             const res = await createTask(url, headers, reqData);
 
-            if (!data.result.unsuccessFullRun && shouldUploadReport) {
+            if (shouldUploadReport) {
+                if (!data.reportPath) {
+                    console.error('Report path was not provided');
+                    return;
+                }
                 const resJson = await res.json();
                 const taskId = resJson.id;
-                await uploadTaskAttachment(data.filePath, headers, taskId);
+                await uploadTaskAttachment(data.reportPath, headers, taskId);
             }
         }
     } catch (e) {

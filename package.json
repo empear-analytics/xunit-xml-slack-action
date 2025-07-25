@@ -24,7 +24,8 @@
     "@actions/github": "^6.0.0",
     "@slack/webhook": "^7.0.2",
     "dotenv": "^16.0.1",
-    "junit2json": "^3.0.2"
+    "junit2json": "^3.0.2",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
     "@babel/core": "^7.21.3",

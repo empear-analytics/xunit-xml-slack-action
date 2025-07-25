@@ -13,7 +13,6 @@ export default async function slackMessage(testStepOutcome: string, result: Resu
         await result.parse();
         return withResultSlackMessage(actionInfo, result);
       } catch (e) {
-        result.setResultParseToUnsuccessful();
         return noResultsSlackMessage(actionInfo,
           'NO TEST RESULT',
           'No test result was found, check the Action for more info.');
@@ -26,7 +25,6 @@ export default async function slackMessage(testStepOutcome: string, result: Resu
         `The test was ${testStepOutcome}, check the Action for more info.`);
 
     default:
-      result.setResultParseToUnsuccessful();
       return noResultsSlackMessage(actionInfo,
         'UNKNOWN RESULT',
         'Check the Action for more info.');
