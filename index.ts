@@ -14,6 +14,7 @@ const shouldCreateClickupTask = (core.getInput("clickup-create-task") || process
 const clickupToken = core.getInput("clickup-token") ? core.getInput("clickup-token") : process.env.CLICKUP_TOKEN;
 const listId = core.getInput("clickup-list-id") ? core.getInput("clickup-list-id") : process.env.CLICKUP_LIST_ID;
 const uploadReport = (core.getInput("clickup-upload-report") || process.env.CLICKUP_UPLOAD_REPORT || "").trim().toLowerCase() === "true";
+const reportPath = core.getInput("report-path") ? core.getInput("report-path") : process.env.REPORT_PATH;
 
 
 (async () => {
@@ -29,7 +30,7 @@ const uploadReport = (core.getInput("clickup-upload-report") || process.env.CLIC
       result,
       token: clickupToken,
       listId,
-      filePath,
+      reportPath,
       uploadReport
     };
 

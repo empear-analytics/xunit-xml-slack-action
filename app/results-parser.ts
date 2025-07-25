@@ -19,7 +19,6 @@ export default class ResultsParser {
   skippedTests: number;
   executionTime: string;
   failedTestsList: string[];
-  unsuccessFullRun: boolean = false
 
   constructor(filePath: string) {
     this.filePath = filePath;
@@ -71,9 +70,5 @@ export default class ResultsParser {
     else{
       return "passed";
     }
-  }
-
-  setResultParseToUnsuccessful() {
-    this.unsuccessFullRun = true;
   }
 }
