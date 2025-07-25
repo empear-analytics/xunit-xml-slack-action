@@ -28,7 +28,7 @@ In the workflow yaml, add a step like this:
       - name: My reporting step
         id: my-test-report
         if: always()
-        uses: empear-analytics/xunit-xml-slack-action@3.2.1
+        uses: empear-analytics/xunit-xml-slack-action@3.2.2
         with:
           test-step-outcome: ${{ steps.my-test-step.outcome }}
           slack-webhook-url: ${{ secrets.MY_SLACK_WEBHOOK_URL }}
