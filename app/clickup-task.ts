@@ -1,7 +1,7 @@
 import ActionInfo from "./action-info";
 import ResultsParser from "./results-parser";
-import fs from 'fs';
-import tar from "tar";
+import * as fs from 'fs';
+import { create as tarCreate } from 'tar'
 import path from "path";
 
 function createHeaders(token: string): Headers {
@@ -44,7 +44,7 @@ async function uploadTaskAttachment(reportPath: string, headers: Headers, taskId
     const outputFile = reportPath + '.tar.gz';
 
     try {
-        await tar.c(
+        await tarCreate(
             {
                 gzip: true,
                 file: outputFile,
