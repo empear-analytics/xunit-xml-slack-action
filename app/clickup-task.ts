@@ -57,12 +57,10 @@ async function uploadTaskAttachment(reportPath: string, headers: Headers, taskId
 
         const file = fs.readFileSync(outputFile);
 
-        const fileName = outputFile.split('/')[outputFile.split('/').length - 1];
-
         const blob = new Blob([file], { type: 'application/zip' });
 
         let formdata = new FormData();
-        formdata.append("attachment", blob, fileName);
+        formdata.append("attachment", blob, 'report.tar.gz');
 
         const attachmentHeaders = headers;
         attachmentHeaders.delete('Content-Type');

@@ -53229,10 +53229,9 @@ async function uploadTaskAttachment(reportPath, headers, taskId) {
         }, [external_path_default().basename(sourceDir)]);
         console.log('Report compressed successfully');
         const file = external_fs_.readFileSync(outputFile);
-        const fileName = outputFile.split('/')[outputFile.split('/').length - 1];
         const blob = new Blob([file], { type: 'application/zip' });
         let formdata = new FormData();
-        formdata.append("attachment", blob, fileName);
+        formdata.append("attachment", blob, 'report.tar.gz');
         const attachmentHeaders = headers;
         attachmentHeaders.delete('Content-Type');
         const requestOptionsAttachment = createRequestInit('POST', attachmentHeaders, formdata);
