@@ -1,7 +1,7 @@
 import ActionInfo from "./action-info";
 import ResultsParser from "./results-parser";
-import * as fs from 'fs';
-import { create as tarCreate } from 'tar'
+import * as fs from "fs";
+import { create as tarCreate } from "tar";
 import path from "path";
 
 function createHeaders(token: string): Headers {
