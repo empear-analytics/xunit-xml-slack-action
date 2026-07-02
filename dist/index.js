@@ -54167,7 +54167,7 @@ class ResultsParser {
         return testResults;
     }
     getTestStatus(testJson) {
-        if (testJson["failure"] !== undefined) {
+        if (testJson["failure"] !== undefined || testJson["error"] !== undefined) {
             return "failed";
         }
         else if (testJson["skipped"] !== undefined) {
